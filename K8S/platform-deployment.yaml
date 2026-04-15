@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: platform-deployment
+
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: platformservice
+
+  template:
+    metadata:
+      labels:
+        app: platformservice
+
+    spec:
+      imagePullSecrets:
+        - name: docker-registry-credentials
+
+      containers:
+        - name: platformservice
+          image: registry.hamdocker.ir/hadi-org/platformservice:latest
+          ports:
+            - containerPort: 8080

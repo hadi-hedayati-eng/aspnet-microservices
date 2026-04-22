@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PlatformService.Contracts;
 using PlatformService.Domain;
 using PlatformService.Infrastructure.Repositories;
+using PlatformService.SyncDataServices;
 
 namespace PlatformService.Controllers;
 
@@ -12,11 +13,17 @@ public class PlatformsController : ControllerBase
 {
     private readonly IMapper _mapper;
     private readonly IPlatformRepository _platformRepository;
+    private readonly ICommandDataClient _commandDataClient;
 
-    public PlatformsController(IMapper mapper, IPlatformRepository platformRepository)
+    public PlatformsController(
+        IMapper mapper,
+        IPlatformRepository platformRepository,
+        ICommandDataClient commandDataClient
+    )
     {
         _mapper = mapper;
         _platformRepository = platformRepository;
+        _commandDataClient = commandDataClient;
     }
 
     [HttpGet]
@@ -45,13 +52,24 @@ public class PlatformsController : ControllerBase
     }
 
     [HttpPost(Name = "CreatePlatform")]
-    public IActionResult CreatePlatform([FromBody] PlatformCreateDto body)
+    public async Task<ActionResult<PlatformReadDto>> CreatePlatform(
+        [FromBody] PlatformCreateDto body
+    )
     {
         var platform = _mapper.Map<Platform>(body);
         _platformRepository.CreatePlatform(platform);
         _platformRepository.SaveChanges();
 
         var platformReadDto = _mapper.Map<PlatformReadDto>(platform);
+
+        try
+        {
+            await _commandDataClient.SendPlatformToCommand(platformReadDto);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not send {ex.Message}");
+        }
 
         return CreatedAtRoute(
             routeName: nameof(GetPlatformById),

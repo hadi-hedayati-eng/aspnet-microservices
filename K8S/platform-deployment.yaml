@@ -5,7 +5,7 @@ metadata:
   name: platform-deployment
 
 spec:
-  replicas: 3
+  replicas: 1
 
   selector:
     matchLabels:
@@ -25,3 +25,10 @@ spec:
           image: registry.hamdocker.ir/hadi-org/platformservice:latest
           ports:
             - containerPort: 8080
+
+          env:
+            - name: Database__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: mssql-connection-string
+                  key: CONNECTION_STRING

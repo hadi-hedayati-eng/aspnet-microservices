@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: command-deployment
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: commandservice
+
+  template:
+    metadata:
+      labels:
+        app: commandservice
+
+    spec:
+      imagePullSecrets:
+        - name: docker-registry-credentials
+
+      containers:
+        - name: commandservice
+          image: registry.hamdocker.ir/hadi-org/commandservice:latest
+          ports:
+            - containerPort: 8080

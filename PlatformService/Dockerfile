@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY *.csproj ./
 COPY ./nuget.config ./
-RUN dotnet restore --force-evaluate
+RUN dotnet restore 
 COPY . ./
 
 RUN dotnet publish -c Release -o out

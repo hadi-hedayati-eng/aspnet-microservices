@@ -6,9 +6,19 @@ using PlatformService.SyncDataServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<PlatformServiceDbContext>(
-    opt => opt.UseInMemoryDatabase("PlatformInMemoryDB")
-);
+builder.Services.AddDbContext<PlatformServiceDbContext>(opt =>
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        Console.WriteLine(builder.Configuration["Database:ConnectionString"]);
+        opt.UseSqlServer(connectionString: builder.Configuration["Database:ConnectionString"]);
+    }
+    else if (builder.Environment.IsProduction())
+    {
+        Console.WriteLine(builder.Configuration["Database:ConnectionString"]);
+        opt.UseSqlServer(connectionString: builder.Configuration["Database:ConnectionString"]);
+    }
+});
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
@@ -23,6 +33,6 @@ var app = builder.Build();
 
 app.MapControllers();
 
-app.Seed();
+app.Seed(builder.Environment.IsProduction());
 
 app.Run();

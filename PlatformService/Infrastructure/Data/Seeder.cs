@@ -1,16 +1,23 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformService.Domain;
 
 namespace PlatformService.Infrastructure.Data;
 
 public static class DataSeeder
 {
-    public static void Seed(this IApplicationBuilder applicationBuilder)
+    public static void Seed(this IApplicationBuilder applicationBuilder, bool isProd)
     {
         var scope = applicationBuilder.ApplicationServices.CreateScope();
 
         var _dbContext = scope.ServiceProvider.GetService<PlatformServiceDbContext>();
         if (_dbContext is null)
             return;
+
+        if (isProd)
+        {
+            Console.WriteLine("Applying Migration");
+            _dbContext.Database.Migrate();
+        }
 
         Console.WriteLine("Seeding Data...");
 

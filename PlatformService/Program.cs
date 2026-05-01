@@ -27,6 +27,8 @@ builder.Services.AddControllers();
 
 builder.Services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>();
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 Console.WriteLine($"--> CommandService Endpoint {builder.Configuration["CommandService:Uri"]}");
 
 var app = builder.Build();

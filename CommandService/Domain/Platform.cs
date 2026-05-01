@@ -3,14 +3,14 @@ namespace CommandService.Domain;
 public class Platform
 {
     public int Id { get; }
-    public int ExternalId { get; }
-    public string Name { get; private set; }
-    public ICollection<Command> Commands { get; set; } = [];
+    public int ExternalId { get; private set; }
+    public string Name { get; private set; } = null!;
+    public ICollection<Command> Commands { get; private set; } = [];
 
     public Platform(string name, int externalId)
     {
-        ExternalId = externalId;
         Name = name;
+        ExternalId = externalId;
     }
 
     private Platform() { }

@@ -15,4 +15,15 @@ public class Platform
     }
 
     private Platform() { }
+
+    public Platform Create()
+    {
+        var plat = new Platform()
+        {
+            Cost = ":k",
+            Name = "kljsdkf",
+            Publisher = "kldjf"
+        };
+        return plat;
+    }
 }

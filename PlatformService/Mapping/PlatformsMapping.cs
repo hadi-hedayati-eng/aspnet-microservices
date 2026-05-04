@@ -1,6 +1,7 @@
 using AutoMapper;
 using PlatformService.Contracts;
 using PlatformService.Domain;
+using PlatformService.Events;
 
 namespace PlatformService.Mapping;
 
@@ -10,5 +11,6 @@ public class PlatformsProfile : Profile
     {
         CreateMap<Platform, PlatformReadDto>();
         CreateMap<PlatformCreateDto, Platform>();
+        CreateMap<PlatformReadDto, PlatformCreatedEvent>();
     }
 }

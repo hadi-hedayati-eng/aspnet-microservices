@@ -11,6 +11,7 @@ public class PlatformsProfile : Profile
     {
         CreateMap<Platform, PlatformReadDto>();
         CreateMap<PlatformCreateDto, Platform>();
-        CreateMap<PlatformReadDto, PlatformCreatedEvent>();
+        CreateMap<PlatformReadDto, PlatformCreatedEvent>()
+            .ForCtorParam("Event", opt => opt.MapFrom(src => "PlatformCreatedEvent"));
     }
 }

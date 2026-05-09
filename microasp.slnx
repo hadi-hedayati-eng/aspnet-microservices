@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CommandService/CommandService.csproj" />
+  <Project Path="PlatformService/PlatformService.csproj" />
+</Solution>

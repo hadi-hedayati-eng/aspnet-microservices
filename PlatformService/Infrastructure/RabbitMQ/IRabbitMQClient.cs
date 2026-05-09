@@ -4,5 +4,5 @@ namespace PlatformService.Infrastructure.RabbitMQ;
 
 public interface IRabbitMQClient
 {
-    void PublishNewPlatform(PlatformCreatedEvent @event);
+    Task PublishNewPlatform(PlatformCreatedEvent @event);
 }

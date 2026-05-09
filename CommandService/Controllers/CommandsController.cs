@@ -27,10 +27,10 @@ public class CommandsController : ControllerBase
         _platformRepository = platformRepository;
     }
 
-    [HttpGet("/{platformId}/commands")]
+    [HttpGet("{platformId}/commands")]
     public ActionResult<IEnumerable<CommandReadDto>> GetCommands([FromRoute] int platformId)
     {
-        var platformExists = _platformRepository.PlatformExists(platformId);
+        var platformExists = _platformRepository.PlatformExistsById(platformId);
 
         if (!platformExists)
         {
@@ -44,13 +44,13 @@ public class CommandsController : ControllerBase
         return Ok(commandsReadObjects);
     }
 
-    [HttpGet("/{platformId}/commands/{commandId}")]
+    [HttpGet("{platformId}/commands/{commandId}")]
     public ActionResult<CommandReadDto> GetCommand(
         [FromRoute] int platformId,
         [FromRoute] int commandId
     )
     {
-        var platformExists = _platformRepository.PlatformExists(platformId);
+        var platformExists = _platformRepository.PlatformExistsById(platformId);
         if (!platformExists)
         {
             return NotFound();
@@ -73,7 +73,7 @@ public class CommandsController : ControllerBase
         [FromBody] CommandCreateDto commandCreateDto
     )
     {
-        var platformExists = _platformRepository.PlatformExists(platformId);
+        var platformExists = _platformRepository.PlatformExistsById(platformId);
         if (!platformExists)
             return NotFound();
 

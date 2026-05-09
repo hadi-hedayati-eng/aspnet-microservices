@@ -2,6 +2,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using PlatformService.Contracts;
 using PlatformService.Domain;
+using PlatformService.Events;
+using PlatformService.Infrastructure.RabbitMQ;
 using PlatformService.Infrastructure.Repositories;
 using PlatformService.SyncDataServices;
 
@@ -14,16 +16,19 @@ public class PlatformsController : ControllerBase
     private readonly IMapper _mapper;
     private readonly IPlatformRepository _platformRepository;
     private readonly ICommandDataClient _commandDataClient;
+    private readonly IRabbitMQClient _rabbitMQClient;
 
     public PlatformsController(
         IMapper mapper,
         IPlatformRepository platformRepository,
-        ICommandDataClient commandDataClient
+        ICommandDataClient commandDataClient,
+        IRabbitMQClient rabbitMQClient
     )
     {
         _mapper = mapper;
         _platformRepository = platformRepository;
         _commandDataClient = commandDataClient;
+        _rabbitMQClient = rabbitMQClient;
     }
 
     [HttpGet]
@@ -62,14 +67,12 @@ public class PlatformsController : ControllerBase
 
         var platformReadDto = _mapper.Map<PlatformReadDto>(platform);
 
-        try
-        {
-            await _commandDataClient.SendPlatformToCommand(platformReadDto);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Could not send {ex.Message}");
-        }
+        /* --------------------- Http Synchronous Communication --------------------- */
+        await _commandDataClient.SendPlatformToCommand(platformReadDto);
+
+        /* ------------------- RabbitMQ Asynchronous Communication ------------------ */
+        var platformCreatedEvent = _mapper.Map<PlatformCreatedEvent>(platformReadDto);
+        await _rabbitMQClient.PublishNewPlatform(platformCreatedEvent);
 
         return CreatedAtRoute(
             routeName: nameof(GetPlatformById),

@@ -1,10 +1,12 @@
+using System.Text;
+using System.Text.Json;
 using PlatformService.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace PlatformService.Infrastructure.RabbitMQ;
 
-public class RabbitMQClient : IRabbitMQClient, IHostedService, IDisposable
+public sealed class RabbitMQClient : IRabbitMQClient, IHostedService, IDisposable
 {
     private readonly IConfiguration _configuration;
     private IConnection _connection;
@@ -17,11 +19,16 @@ public class RabbitMQClient : IRabbitMQClient, IHostedService, IDisposable
     public void Dispose()
     {
         _connection.Dispose();
+        Console.WriteLine("Disposing");
     }
 
-    public void PublishNewPlatform(PlatformCreatedEvent @event)
+    public async Task PublishNewPlatform(PlatformCreatedEvent @event)
     {
-        throw new NotImplementedException();
+        using var channel = await CreateChannel();
+        var eventString = JsonSerializer.Serialize(@event);
+        var eventBytes = Encoding.UTF8.GetBytes(eventString);
+        await channel.BasicPublishAsync(exchange: "trigger", routingKey: "", body: eventBytes);
+        Console.WriteLine("Sending Message");
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -48,7 +55,10 @@ public class RabbitMQClient : IRabbitMQClient, IHostedService, IDisposable
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         Console.WriteLine("Closing RabbitMQ");
-        await _connection.CloseAsync(cancellationToken);
+        if (_connection.IsOpen)
+        {
+            await _connection.CloseAsync(cancellationToken);
+        }
     }
 
     public async Task<IChannel> CreateChannel()

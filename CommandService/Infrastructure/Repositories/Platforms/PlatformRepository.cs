@@ -23,7 +23,12 @@ public class PlatformRepository : IPlatformRepository
         return _dbContext.Platforms.ToList();
     }
 
-    public bool PlatformExists(int platformId)
+    public bool PlatformExistsByExternalId(int externalId)
+    {
+        return _dbContext.Platforms.Any(p => p.Id == externalId);
+    }
+
+    public bool PlatformExistsById(int platformId)
     {
         return _dbContext.Platforms.Any(p => p.Id == platformId);
     }

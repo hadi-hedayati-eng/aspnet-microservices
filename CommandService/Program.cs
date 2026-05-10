@@ -4,7 +4,7 @@ using CommandService.Infrastructure.Repositories.Commands;
 using CommandService.Infrastructure.Repositories.Platforms;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Serilog.Sinks.Elasticsearch;
+using Serilog.Sinks.OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,18 +23,16 @@ builder.Services.AddHostedService<RabbitMQSubscriber>();
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .Enrich.WithMachineName()
-    .Enrich.WithEnvironmentName()
     .WriteTo.Console()
-    .WriteTo.Elasticsearch(
-        new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
+    .WriteTo.OpenTelemetry(options =>
+    {
+        options.Endpoint = "http://localhost:4317";
+        options.Protocol = OtlpProtocol.Grpc;
+        options.ResourceAttributes = new Dictionary<string, object>
         {
-            IndexFormat = "command-service-logs-{0:yyyy-MM}",
-            AutoRegisterTemplate = true,
-            NumberOfReplicas = 0,
-            NumberOfShards = 1
-        }
-    )
-    .ReadFrom.Configuration(builder.Configuration)
+            ["service.name"] = "CommandService"
+        };
+    })
     .CreateLogger();
 
 builder.Host.UseSerilog();

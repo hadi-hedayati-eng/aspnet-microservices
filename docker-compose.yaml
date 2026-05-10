@@ -16,8 +16,28 @@ services:
       - "5601:5601"
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTIC_APM_SERVER_URL=http://apm-server:8200
     depends_on:
       - elasticsearch
+
+  apm-server:
+    image: mirror-docker.runflare.com/elastic/apm-server:8.13.0
+    command: >
+      apm-server -e
+        -E output.elasticsearch.hosts=["elasticsearch:9200"]
+        -E setup.kibana.host=kibana:5601
+        -E apm-server.kibana.enabled=true
+        -E apm-server.kibana.host=kibana:5601
+    ports:
+      - "8200:8200" # Elastic APM protocol
+      - "4317:4317" # OTLP gRPC  ← your app sends here
+      - "4318:4318" # OTLP HTTP
+    environment:
+      - output.elasticsearch.hosts=["elasticsearch:9200"]
+      - setup.kibana.host=kibana:5601
+    depends_on:
+      - elasticsearch
+      - kibana
 
 volumes:
   es_data:

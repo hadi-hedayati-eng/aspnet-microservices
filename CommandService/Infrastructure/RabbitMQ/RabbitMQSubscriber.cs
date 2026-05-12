@@ -60,7 +60,11 @@ public class RabbitMQSubscriber : IRabbitMQSubscriber, IHostedService, IAsyncDis
             type: ExchangeType.Fanout,
             cancellationToken: cancellationToken
         );
-        await _channel.QueueDeclareAsync(queueName, cancellationToken: cancellationToken);
+        await _channel.QueueDeclareAsync(
+            queueName,
+            cancellationToken: cancellationToken,
+            exclusive: false
+        );
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += OnMessageReceived;
@@ -120,7 +124,6 @@ public class RabbitMQSubscriber : IRabbitMQSubscriber, IHostedService, IAsyncDis
             }
         }
 
-        // Todo DeliveryTag
         // Todo Activity, Span, Activity Source
         // Todo Kubernetes
         await _channel.BasicAckAsync(@event.DeliveryTag, multiple: false);

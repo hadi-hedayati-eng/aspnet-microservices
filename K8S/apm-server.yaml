@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apm-server-config
+data:
+  apm-server.yml: |
+    apm-server:
+      host: "0.0.0.0:8200"
+      data_streams:
+        wait_for_integration: false
+
+    output.elasticsearch:
+      hosts: ["http://elasticsearch:9200"]
+
+    setup.kibana:
+      host: "kibana:5601"
+
+    logging.level: info
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apm-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apm-server
+  template:
+    metadata:
+      labels:
+        app: apm-server
+    spec:
+      containers:
+        - name: apm-server
+          image: mirror-docker.runflare.com/elastic/apm-server:8.13.0
+          args:
+            - apm-server
+            - -e
+            - --strict.perms=false
+            - -c
+            - /usr/share/apm-server/apm-server.yml
+          ports:
+            - containerPort: 8200
+            - containerPort: 4317
+            - containerPort: 4318
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/apm-server/apm-server.yml
+              subPath: apm-server.yml
+      volumes:
+        - name: config
+          configMap:
+            name: apm-server-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apm-server
+spec:
+  type: ClusterIP
+  selector:
+    app: apm-server
+  ports:
+    - name: apm
+      port: 8200
+      targetPort: 8200
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318

@@ -25,3 +25,24 @@ spec:
           image: registry.hamdocker.ir/hadi-org/commandservice:latest
           ports:
             - containerPort: 8080
+          env:
+            - name: Elastic__OpenTelemetry
+              value: "http://apm-server:8200"
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: command-clusterip-service
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: commandservice
+
+  ports:
+    - name: commandservice
+      protocol: TCP
+      port: 80
+      targetPort: 8080

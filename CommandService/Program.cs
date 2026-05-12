@@ -26,7 +26,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.OpenTelemetry(options =>
     {
-        options.Endpoint = "http://localhost:4317";
+        options.Endpoint = builder.Configuration["Elastic:OpenTelemetry"];
         options.Protocol = OtlpProtocol.Grpc;
         options.ResourceAttributes = new Dictionary<string, object>
         {

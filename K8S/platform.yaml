@@ -25,10 +25,27 @@ spec:
           image: registry.hamdocker.ir/hadi-org/platformservice:latest
           ports:
             - containerPort: 8080
-
           env:
             - name: Database__ConnectionString
               valueFrom:
                 secretKeyRef:
                   name: mssql-connection-string
                   key: CONNECTION_STRING
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: platform-clusterip-service
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: platformservice
+
+  ports:
+    - name: platformservice
+      protocol: TCP
+      port: 80
+      targetPort: 8080

@@ -4,6 +4,8 @@ using PlatformService.Infrastructure.Data;
 using PlatformService.Infrastructure.RabbitMQ;
 using PlatformService.Infrastructure.Repositories;
 using PlatformService.SyncDataServices;
+using Serilog;
+using Serilog.Sinks.OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +38,21 @@ builder.Services.AddHostedService(p => p.GetRequiredService<RabbitMQClient>());
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 Console.WriteLine($"--> CommandService Endpoint {builder.Configuration["CommandService:Uri"]}");
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.OpenTelemetry(options =>
+    {
+        options.Endpoint = builder.Configuration["Elastic:OpenTelemetry"];
+        options.Protocol = OtlpProtocol.Grpc;
+        options.ResourceAttributes = new Dictionary<string, object>
+        {
+            ["service.name"] = "PlatformService"
+        };
+    })
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 

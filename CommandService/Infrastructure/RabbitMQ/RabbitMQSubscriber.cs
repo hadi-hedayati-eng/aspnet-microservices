@@ -125,7 +125,7 @@ public class RabbitMQSubscriber : IRabbitMQSubscriber, IHostedService, IAsyncDis
         }
 
         // Todo Activity, Span, Activity Source
-        // Todo Kubernetes
+        // Logging
         await _channel.BasicAckAsync(@event.DeliveryTag, multiple: false);
     }
 

@@ -31,6 +31,8 @@ spec:
                 secretKeyRef:
                   name: mssql-connection-string
                   key: CONNECTION_STRING
+            - name: Elastic__OpenTelemetry
+              value: "http://apm-server:8200"
 ---
 apiVersion: v1
 kind: Service

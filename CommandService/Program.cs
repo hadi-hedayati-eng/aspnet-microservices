@@ -21,8 +21,6 @@ builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
 builder.Services.AddHostedService<RabbitMQSubscriber>();
 
 Log.Logger = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .Enrich.WithMachineName()
     .WriteTo.Console()
     .WriteTo.OpenTelemetry(options =>
     {

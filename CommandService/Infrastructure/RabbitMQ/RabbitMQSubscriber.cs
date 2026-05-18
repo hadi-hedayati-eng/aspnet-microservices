@@ -63,7 +63,8 @@ public class RabbitMQSubscriber : IRabbitMQSubscriber, IHostedService, IAsyncDis
         await _channel.QueueDeclareAsync(
             queueName,
             cancellationToken: cancellationToken,
-            exclusive: false
+            exclusive: false,
+            durable: true
         );
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
@@ -124,8 +125,11 @@ public class RabbitMQSubscriber : IRabbitMQSubscriber, IHostedService, IAsyncDis
             }
         }
 
-        // Todo Activity, Span, Activity Source
-        // Logging
+        // Todo Alerting
+        // Todo Tracing
+        // Todo Metrics
+        // Todo SwashBuckle
+
         await _channel.BasicAckAsync(@event.DeliveryTag, multiple: false);
     }
 

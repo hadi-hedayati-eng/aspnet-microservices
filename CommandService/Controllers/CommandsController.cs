@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using AutoMapper;
 using CommandService.Contracts;
 using CommandService.Domain;
@@ -13,18 +14,23 @@ public class CommandsController : ControllerBase
 {
     private readonly IMapper _mapper;
     private readonly ICommandRepository _commandRepository;
-
+    private static readonly ActivitySource _activitySource = new ActivitySource(
+        "CommandService.CommandsController"
+    );
     private readonly IPlatformRepository _platformRepository;
+    private readonly ILogger<CommandsController> _logger;
 
     public CommandsController(
         IMapper mapper,
         ICommandRepository commandRepository,
-        IPlatformRepository platformRepository
+        IPlatformRepository platformRepository,
+        ILogger<CommandsController> logger
     )
     {
         _mapper = mapper;
         _commandRepository = commandRepository;
         _platformRepository = platformRepository;
+        _logger = logger;
     }
 
     [HttpGet("{platformId}/commands")]
@@ -73,9 +79,12 @@ public class CommandsController : ControllerBase
         [FromBody] CommandCreateDto commandCreateDto
     )
     {
+        using var activity = _activitySource.StartActivity("Create Command", ActivityKind.Consumer);
         var platformExists = _platformRepository.PlatformExistsById(platformId);
         if (!platformExists)
             return NotFound();
+
+        _logger.LogInformation("Creating Command In the Commands Controller!!!");
 
         var command = _mapper.Map<Command>(commandCreateDto);
 

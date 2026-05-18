@@ -40,5 +40,11 @@ services:
       - elasticsearch
       - kibana
 
+  rabbitmq:
+    image: mirror-docker.runflare.com/library/rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
 volumes:
   es_data:

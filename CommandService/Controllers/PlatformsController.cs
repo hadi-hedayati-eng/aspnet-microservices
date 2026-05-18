@@ -23,6 +23,11 @@ public class PlatformsController : ControllerBase
     {
         Console.WriteLine("--> Inbound Post from PLATFORM to COMMAND Service");
 
+        foreach (var (key, value) in Request.Headers)
+        {
+            Console.WriteLine($"{key}: {value}");
+        }
+
         return StatusCode(201, new { Hello = "World" });
     }
 

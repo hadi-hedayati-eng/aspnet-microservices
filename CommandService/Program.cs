@@ -49,6 +49,8 @@ builder
         t =>
             t.AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
+                .AddRabbitMQInstrumentation()
+                .AddEntityFrameworkCoreInstrumentation()
                 .AddOtlpExporter(
                     o => o.Endpoint = new Uri(builder.Configuration["Elastic:OpenTelemetry"])
                 )

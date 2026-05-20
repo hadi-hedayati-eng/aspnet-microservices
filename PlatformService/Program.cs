@@ -18,7 +18,8 @@ builder.Services.AddDbContext<PlatformServiceDbContext>(opt =>
     {
         Console.WriteLine(builder.Configuration["Database:ConnectionString"]);
         // opt.UseSqlServer(connectionString: builder.Configuration["Database:ConnectionString"]);
-        opt.UseInMemoryDatabase("InMemoryDatabase");
+        opt.UseSqlServer(connectionString: builder.Configuration["Database:ConnectionString"]);
+        // opt.UseInMemoryDatabase("InMemoryDatabase");
     }
     else if (builder.Environment.IsProduction())
     {
@@ -65,6 +66,8 @@ builder
         t =>
             t.AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
+                .AddRabbitMQInstrumentation()
+                .AddEntityFrameworkCoreInstrumentation()
                 .AddOtlpExporter(
                     o => o.Endpoint = new Uri(builder.Configuration["Elastic:OpenTelemetry"])
                 )

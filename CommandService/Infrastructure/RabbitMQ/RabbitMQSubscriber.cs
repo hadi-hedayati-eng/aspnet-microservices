@@ -126,9 +126,9 @@ public class RabbitMQSubscriber : IRabbitMQSubscriber, IHostedService, IAsyncDis
         }
 
         // Todo Alerting
-        // Todo Tracing
         // Todo Metrics
         // Todo SwashBuckle
+        // Todo Transaction inside Transaction
 
         await _channel.BasicAckAsync(@event.DeliveryTag, multiple: false);
     }

@@ -125,10 +125,10 @@ public class RabbitMQSubscriber : IRabbitMQSubscriber, IHostedService, IAsyncDis
             }
         }
 
-        // Todo Alerting
-        // Todo Metrics
         // Todo SwashBuckle
         // Todo Transaction inside Transaction
+        // Todo Rate Limit
+        // Todo Async
 
         await _channel.BasicAckAsync(@event.DeliveryTag, multiple: false);
     }

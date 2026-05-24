@@ -4,12 +4,12 @@ using CommandService.Infrastructure.RabbitMQ;
 using CommandService.Infrastructure.Repositories.Commands;
 using CommandService.Infrastructure.Repositories.Platforms;
 using CommandService.Logging;
+using CommandService.SyncDataServices;
 using Microsoft.EntityFrameworkCore;
-using OpenTelemetry;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
-using Serilog.Configuration;
 using Serilog.Sinks.OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +23,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<ICommandRepository, CommandRepository>();
 builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
+builder.Services.AddScoped<IPlatformClient, GrpcPlatformClient>();
 
 builder.Services.AddHostedService<RabbitMQSubscriber>();
 
@@ -45,6 +46,16 @@ builder.Host.UseSerilog();
 builder
     .Services.AddOpenTelemetry()
     .ConfigureResource(r => r.AddService("CommandService"))
+    .WithMetrics(
+        m =>
+            m.AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddProcessInstrumentation()
+                .AddOtlpExporter(
+                    o => o.Endpoint = new Uri(builder.Configuration["Elastic:OpenTelemetry"])
+                )
+    )
     .WithTracing(
         t =>
             t.AddAspNetCoreInstrumentation()

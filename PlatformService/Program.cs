@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using PlatformService.Controllers;
 using PlatformService.Infrastructure;
 using PlatformService.Infrastructure.Data;
 using PlatformService.Infrastructure.RabbitMQ;
@@ -62,6 +64,16 @@ builder.Host.UseSerilog();
 builder
     .Services.AddOpenTelemetry()
     .ConfigureResource(r => r.AddService("PlatformService"))
+    .WithMetrics(
+        m =>
+            m.AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddProcessInstrumentation()
+                .AddOtlpExporter(
+                    o => o.Endpoint = new Uri(builder.Configuration["Elastic:OpenTelemetry"]!)
+                )
+    )
     .WithTracing(
         t =>
             t.AddAspNetCoreInstrumentation()
@@ -69,13 +81,19 @@ builder
                 .AddRabbitMQInstrumentation()
                 .AddEntityFrameworkCoreInstrumentation()
                 .AddOtlpExporter(
-                    o => o.Endpoint = new Uri(builder.Configuration["Elastic:OpenTelemetry"])
+                    o => o.Endpoint = new Uri(builder.Configuration["Elastic:OpenTelemetry"]!)
                 )
     );
+
+builder.Services.AddGrpc();
+builder.Services.AddGrpcReflection();
 
 var app = builder.Build();
 
 app.MapControllers();
+
+app.MapGrpcService<GrpcPlatformController>();
+app.MapGrpcReflectionService();
 
 app.Seed(builder.Environment.IsProduction());
 

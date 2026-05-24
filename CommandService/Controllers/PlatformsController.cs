@@ -1,6 +1,9 @@
+using System.Diagnostics.Metrics;
+using System.Net;
 using AutoMapper;
 using CommandService.Contracts;
 using CommandService.Infrastructure.Repositories.Platforms;
+using CommandService.SyncDataServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CommandService.Controllers;
@@ -11,11 +14,22 @@ public class PlatformsController : ControllerBase
 {
     private readonly IPlatformRepository _platformRepository;
     private readonly IMapper _mapper;
+    private readonly IPlatformClient _platformClient;
 
-    public PlatformsController(IMapper mapper, IPlatformRepository platformRepository)
+    private static readonly Meter Meter = new("PlatformController");
+    private static readonly Counter<int> PlatformsCreated = Meter.CreateCounter<int>(
+        "platforms.created"
+    );
+
+    public PlatformsController(
+        IMapper mapper,
+        IPlatformRepository platformRepository,
+        IPlatformClient platformClient
+    )
     {
         _mapper = mapper;
         _platformRepository = platformRepository;
+        _platformClient = platformClient;
     }
 
     [HttpPost]
@@ -27,6 +41,8 @@ public class PlatformsController : ControllerBase
         {
             Console.WriteLine($"{key}: {value}");
         }
+
+        PlatformsCreated.Add(1);
 
         return StatusCode(201, new { Hello = "World" });
     }
@@ -41,5 +57,12 @@ public class PlatformsController : ControllerBase
         var platformReadObjects = _mapper.Map<IEnumerable<PlatformReadDto>>(platforms);
 
         return Ok(platformReadObjects);
+    }
+
+    [HttpPost("fetch")]
+    public async Task<IActionResult> FetchPlatforms()
+    {
+        await _platformClient.ReturnAllPlatforms();
+        return StatusCode((int)HttpStatusCode.Created);
     }
 }

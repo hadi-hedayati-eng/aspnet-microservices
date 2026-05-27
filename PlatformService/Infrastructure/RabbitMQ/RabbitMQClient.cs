@@ -6,15 +6,13 @@ using RabbitMQ.Client.Events;
 
 namespace PlatformService.Infrastructure.RabbitMQ;
 
-public sealed class RabbitMQClient : IRabbitMQClient, IHostedService, IDisposable
+public sealed class RabbitMQClient(IConfiguration configuration)
+    : IRabbitMQClient,
+        IHostedService,
+        IDisposable
 {
-    private readonly IConfiguration _configuration;
-    private IConnection _connection;
-
-    public RabbitMQClient(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
+    private readonly IConfiguration _configuration = configuration;
+    private IConnection _connection = null!;
 
     public void Dispose()
     {

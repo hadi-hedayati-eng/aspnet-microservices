@@ -25,6 +25,9 @@ builder.Services.AddScoped<ICommandRepository, CommandRepository>();
 builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
 builder.Services.AddScoped<IPlatformClient, GrpcPlatformClient>();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddHostedService<RabbitMQSubscriber>();
 
 Log.Logger = new LoggerConfiguration()
@@ -91,5 +94,9 @@ ActivitySource.AddActivityListener(
 
 var app = builder.Build();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.MapControllers();
+
 app.Run();

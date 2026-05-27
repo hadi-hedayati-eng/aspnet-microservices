@@ -43,6 +43,9 @@ builder.Services.AddHostedService(p => p.GetRequiredService<RabbitMQClient>());
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 Console.WriteLine($"--> CommandService Endpoint {builder.Configuration["CommandService:Uri"]}");
 
 Log.Logger = new LoggerConfiguration()
@@ -89,6 +92,9 @@ builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
 
 var app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapControllers();
 

@@ -34,16 +34,18 @@ public class CommandsController : ControllerBase
     }
 
     [HttpGet("{platformId}/commands")]
-    public ActionResult<IEnumerable<CommandReadDto>> GetCommands([FromRoute] int platformId)
+    public async Task<ActionResult<IEnumerable<CommandReadDto>>> GetCommands(
+        [FromRoute] int platformId
+    )
     {
-        var platformExists = _platformRepository.PlatformExistsById(platformId);
+        var platformExists = await _platformRepository.PlatformExistsById(platformId);
 
         if (!platformExists)
         {
             return NotFound();
         }
 
-        var commands = _commandRepository.GetCommandsByPlatform(platformId);
+        var commands = await _commandRepository.GetCommandsByPlatform(platformId);
 
         var commandsReadObjects = _mapper.Map<IEnumerable<CommandReadDto>>(commands);
 
@@ -51,18 +53,18 @@ public class CommandsController : ControllerBase
     }
 
     [HttpGet("{platformId}/commands/{commandId}")]
-    public ActionResult<CommandReadDto> GetCommand(
+    public async Task<ActionResult<CommandReadDto>> GetCommand(
         [FromRoute] int platformId,
         [FromRoute] int commandId
     )
     {
-        var platformExists = _platformRepository.PlatformExistsById(platformId);
+        var platformExists = await _platformRepository.PlatformExistsById(platformId);
         if (!platformExists)
         {
             return NotFound();
         }
 
-        var command = _commandRepository.GetCommand(platformId, commandId);
+        var command = await _commandRepository.GetCommand(platformId, commandId);
         if (command is null)
         {
             return NotFound();
@@ -74,13 +76,13 @@ public class CommandsController : ControllerBase
     }
 
     [HttpPost("{platformId}/commands")]
-    public ActionResult<CommandReadDto> CreateCommand(
+    public async Task<ActionResult<CommandReadDto>> CreateCommand(
         [FromRoute] int platformId,
         [FromBody] CommandCreateDto commandCreateDto
     )
     {
         using var activity = _activitySource.StartActivity("Create Command", ActivityKind.Consumer);
-        var platformExists = _platformRepository.PlatformExistsById(platformId);
+        var platformExists = await _platformRepository.PlatformExistsById(platformId);
         if (!platformExists)
             return NotFound();
 
@@ -88,8 +90,8 @@ public class CommandsController : ControllerBase
 
         var command = _mapper.Map<Command>(commandCreateDto);
 
-        _commandRepository.CreateCommand(platformId, command);
-        _commandRepository.SaveChanges();
+        await _commandRepository.CreateCommand(platformId, command);
+        await _commandRepository.SaveChanges();
 
         var commandReadObject = _mapper.Map<CommandReadDto>(command);
 

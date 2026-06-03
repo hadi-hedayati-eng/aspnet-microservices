@@ -115,17 +115,16 @@ public class RabbitMQSubscriber : IRabbitMQSubscriber, IHostedService, IAsyncDis
                 scope.ServiceProvider.GetRequiredService<IPlatformRepository>();
 
             var platform = _mapper.Map<Platform>(platformCreatedEvent);
-            var doesPlatformExists = platformRepository.PlatformExistsByExternalId(
+            var doesPlatformExists = await platformRepository.PlatformExistsByExternalId(
                 platform.ExternalId
             );
             if (!doesPlatformExists)
             {
-                platformRepository.CreatePlatform(platform);
-                platformRepository.SaveChanges();
+                await platformRepository.CreatePlatform(platform);
+                await platformRepository.SaveChanges();
             }
         }
 
-        // Todo SwashBuckle
         // Todo Rate Limit
         // Todo Async
 

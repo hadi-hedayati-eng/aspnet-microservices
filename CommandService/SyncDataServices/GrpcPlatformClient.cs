@@ -35,11 +35,10 @@ public class GrpcPlatformClient : IPlatformClient
         var platforms = _mapper.Map<IEnumerable<Platform>>(response.Platforms);
         foreach (var platform in platforms)
         {
-            if (_platformRepository.PlatformExistsByExternalId(platform.ExternalId))
+            if (await _platformRepository.PlatformExistsByExternalId(platform.ExternalId))
                 continue;
-            Console.WriteLine(platform.Name);
-            _platformRepository.CreatePlatform(platform);
+            await _platformRepository.CreatePlatform(platform);
         }
-        _platformRepository.SaveChanges();
+        await _platformRepository.SaveChanges();
     }
 }

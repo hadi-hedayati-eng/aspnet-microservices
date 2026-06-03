@@ -15,19 +15,19 @@ public class GrpcPlatformController : GrpcPlatformService.GrpcPlatformServiceBas
         _mapper = mapper;
     }
 
-    public override Task<GetAllPlatformsResponse> GetAllPlatforms(
+    public override async Task<GetAllPlatformsResponse> GetAllPlatforms(
         GetAllPlatformsRequest request,
         ServerCallContext context
     )
     {
         var response = new GetAllPlatformsResponse();
-        var platforms = _platformRepository.GetAll();
+        var platforms = await _platformRepository.GetAll();
 
         foreach (var platform in platforms)
         {
             response.Platforms.Add(_mapper.Map<GrpcPlatformModel>(platform));
         }
 
-        return Task.FromResult(response);
+        return response;
     }
 }

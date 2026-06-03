@@ -9,16 +9,10 @@ namespace PlatformService.Infrastructure.RabbitMQ;
 public sealed class RabbitMQClient(IConfiguration configuration)
     : IRabbitMQClient,
         IHostedService,
-        IDisposable
+        IAsyncDisposable
 {
     private readonly IConfiguration _configuration = configuration;
     private IConnection _connection = null!;
-
-    public void Dispose()
-    {
-        _connection.Dispose();
-        Console.WriteLine("Disposing");
-    }
 
     public async Task PublishNewPlatform(PlatformCreatedEvent @event)
     {
@@ -69,5 +63,13 @@ public sealed class RabbitMQClient(IConfiguration configuration)
     {
         Console.WriteLine("RabbitMQ Connection Shutdown");
         return Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_connection.IsOpen)
+        {
+            await _connection.DisposeAsync();
+        }
     }
 }

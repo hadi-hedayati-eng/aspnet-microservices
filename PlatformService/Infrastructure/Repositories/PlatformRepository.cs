@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlatformService.Domain;
 
 namespace PlatformService.Infrastructure.Repositories;
@@ -6,26 +7,28 @@ public class PlatformRepository(PlatformServiceDbContext dbContext) : IPlatformR
 {
     private readonly PlatformServiceDbContext _dbContext = dbContext;
 
-    public void CreatePlatform(Platform platform)
+    public async Task CreatePlatform(Platform platform)
     {
         ArgumentNullException.ThrowIfNull(platform);
 
-        _dbContext.Platforms.Add(platform);
+        await _dbContext.Platforms.AddAsync(platform);
     }
 
-    public IEnumerable<Platform> GetAll()
+    public async Task<IEnumerable<Platform>> GetAll()
     {
-        return _dbContext.Platforms.ToList();
+        return await _dbContext.Platforms.ToListAsync();
     }
 
-    public Platform? GetById(int id)
+    public async Task<Platform?> GetById(int id)
     {
-        return _dbContext.Platforms.Where(platform => platform.Id == id).FirstOrDefault();
+        return await _dbContext
+            .Platforms.Where(platform => platform.Id == id)
+            .FirstOrDefaultAsync();
     }
 
-    public bool SaveChanges()
+    public async Task<bool> SaveChanges()
     {
-        var result = _dbContext.SaveChanges();
+        var result = await _dbContext.SaveChangesAsync();
         return result >= 0;
     }
 }

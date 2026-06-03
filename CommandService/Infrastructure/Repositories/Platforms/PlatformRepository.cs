@@ -1,4 +1,5 @@
 using CommandService.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace CommandService.Infrastructure.Repositories.Platforms;
 
@@ -11,30 +12,30 @@ public class PlatformRepository : IPlatformRepository
         _dbContext = dbContext;
     }
 
-    public void CreatePlatform(Platform platform)
+    public async Task CreatePlatform(Platform platform)
     {
         ArgumentNullException.ThrowIfNull(platform);
 
-        _dbContext.Platforms.Add(platform);
+        await _dbContext.Platforms.AddAsync(platform);
     }
 
-    public IEnumerable<Platform> GetAllPlatforms()
+    public async Task<IEnumerable<Platform>> GetAllPlatforms()
     {
-        return _dbContext.Platforms.ToList();
+        return await _dbContext.Platforms.ToListAsync();
     }
 
-    public bool PlatformExistsByExternalId(int externalId)
+    public Task<bool> PlatformExistsByExternalId(int externalId)
     {
-        return _dbContext.Platforms.Any(p => p.Id == externalId);
+        return _dbContext.Platforms.AnyAsync(p => p.Id == externalId);
     }
 
-    public bool PlatformExistsById(int platformId)
+    public Task<bool> PlatformExistsById(int platformId)
     {
-        return _dbContext.Platforms.Any(p => p.Id == platformId);
+        return _dbContext.Platforms.AnyAsync(p => p.Id == platformId);
     }
 
-    public bool SaveChanges()
+    public async Task<bool> SaveChanges()
     {
-        return _dbContext.SaveChanges() >= 0;
+        return await _dbContext.SaveChangesAsync() >= 0;
     }
 }

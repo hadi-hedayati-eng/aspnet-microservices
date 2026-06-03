@@ -4,8 +4,8 @@ namespace CommandService.Infrastructure.Repositories.Commands;
 
 public interface ICommandRepository
 {
-    bool SaveChanges();
-    IEnumerable<Command> GetCommandsByPlatform(int platformId);
-    Command? GetCommand(int platformId, int commandId);
-    void CreateCommand(int platformId, Command command);
+    Task<bool> SaveChanges();
+    Task<IEnumerable<Command>> GetCommandsByPlatform(int platformId);
+    Task<Command?> GetCommand(int platformId, int commandId);
+    Task CreateCommand(int platformId, Command command);
 }

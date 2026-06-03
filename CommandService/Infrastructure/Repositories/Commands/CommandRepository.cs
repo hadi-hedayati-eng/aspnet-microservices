@@ -1,4 +1,5 @@
 using CommandService.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace CommandService.Infrastructure.Repositories.Commands;
 
@@ -11,27 +12,27 @@ public class CommandRepository : ICommandRepository
         _dbContext = dbContext;
     }
 
-    public void CreateCommand(int platformId, Command command)
+    public async Task CreateCommand(int platformId, Command command)
     {
         ArgumentNullException.ThrowIfNull(command);
         command.PlatformId = platformId;
-        _dbContext.Commands.Add(command);
+        await _dbContext.Commands.AddAsync(command);
     }
 
-    public Command? GetCommand(int platformId, int commandId)
+    public async Task<Command?> GetCommand(int platformId, int commandId)
     {
-        return _dbContext
+        return await _dbContext
             .Commands.Where(c => c.Id == commandId && c.PlatformId == platformId)
-            .FirstOrDefault();
+            .FirstOrDefaultAsync();
     }
 
-    public IEnumerable<Command> GetCommandsByPlatform(int platformId)
+    public async Task<IEnumerable<Command>> GetCommandsByPlatform(int platformId)
     {
-        return _dbContext.Commands.Where(c => c.PlatformId == platformId);
+        return await _dbContext.Commands.Where(c => c.PlatformId == platformId).ToListAsync();
     }
 
-    public bool SaveChanges()
+    public async Task<bool> SaveChanges()
     {
-        return _dbContext.SaveChanges() >= 0;
+        return await _dbContext.SaveChangesAsync() >= 0;
     }
 }

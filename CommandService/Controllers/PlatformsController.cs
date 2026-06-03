@@ -48,11 +48,11 @@ public class PlatformsController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<PlatformReadDto>> GetPlatforms()
+    public async Task<ActionResult<IEnumerable<PlatformReadDto>>> GetPlatforms()
     {
         Console.WriteLine("-- Getting Platforms from CommandService");
 
-        var platforms = _platformRepository.GetAllPlatforms();
+        var platforms = await _platformRepository.GetAllPlatforms();
 
         var platformReadObjects = _mapper.Map<IEnumerable<PlatformReadDto>>(platforms);
 

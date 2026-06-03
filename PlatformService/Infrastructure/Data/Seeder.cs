@@ -13,11 +13,8 @@ public static class DataSeeder
         if (_dbContext is null)
             return;
 
-        if (isProd)
-        {
-            Console.WriteLine("Applying Migration");
-            _dbContext.Database.Migrate();
-        }
+        Console.WriteLine("Applying Migration");
+        _dbContext.Database.Migrate();
 
         Console.WriteLine("Seeding Data...");
 

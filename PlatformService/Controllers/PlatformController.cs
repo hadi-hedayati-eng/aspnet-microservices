@@ -32,9 +32,9 @@ public class PlatformsController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<PlatformReadDto>?> GetPlatforms()
+    public async Task<ActionResult<IEnumerable<PlatformReadDto>?>> GetPlatforms()
     {
-        var result = _platformRepository.GetAll();
+        var result = await _platformRepository.GetAll();
 
         if (!result.Any())
             return Ok(new List<PlatformReadDto>());
@@ -44,9 +44,9 @@ public class PlatformsController : ControllerBase
     }
 
     [HttpGet("{id}", Name = "GetPlatformById")]
-    public ActionResult<PlatformReadDto> GetPlatformById([FromRoute] int id)
+    public async Task<ActionResult<PlatformReadDto>> GetPlatformById([FromRoute] int id)
     {
-        var platform = _platformRepository.GetById(id);
+        var platform = await _platformRepository.GetById(id);
 
         if (platform is null)
             return NotFound();
@@ -62,8 +62,8 @@ public class PlatformsController : ControllerBase
     )
     {
         var platform = _mapper.Map<Platform>(body);
-        _platformRepository.CreatePlatform(platform);
-        _platformRepository.SaveChanges();
+        await _platformRepository.CreatePlatform(platform);
+        await _platformRepository.SaveChanges();
 
         var platformReadDto = _mapper.Map<PlatformReadDto>(platform);
 

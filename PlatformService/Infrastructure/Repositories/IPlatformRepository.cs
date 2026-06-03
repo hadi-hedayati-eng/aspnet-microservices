@@ -4,9 +4,8 @@ namespace PlatformService.Infrastructure.Repositories;
 
 public interface IPlatformRepository
 {
-    bool SaveChanges();
-
-    IEnumerable<Platform> GetAll();
-    Platform? GetById(int id);
-    void CreatePlatform(Platform platform);
+    Task<bool> SaveChanges();
+    Task<IEnumerable<Platform>> GetAll();
+    Task<Platform?> GetById(int id);
+    Task CreatePlatform(Platform platform);
 }

@@ -125,9 +125,6 @@ public class RabbitMQSubscriber : IRabbitMQSubscriber, IHostedService, IAsyncDis
             }
         }
 
-        // Todo Rate Limit
-        // Todo Async
-
         await _channel.BasicAckAsync(@event.DeliveryTag, multiple: false);
     }
 

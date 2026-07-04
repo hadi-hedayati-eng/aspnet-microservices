@@ -1,10 +1,12 @@
 using System.Diagnostics;
+using System.Threading.RateLimiting;
 using CommandService.Infrastructure;
 using CommandService.Infrastructure.RabbitMQ;
 using CommandService.Infrastructure.Repositories.Commands;
 using CommandService.Infrastructure.Repositories.Platforms;
 using CommandService.Logging;
 using CommandService.SyncDataServices;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -80,6 +82,57 @@ ActivitySource.AddActivityListener(
     }
 );
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddFixedWindowLimiter(
+        "fixed",
+        opt =>
+        {
+            opt.Window = TimeSpan.FromMinutes(1);
+            opt.PermitLimit = 10;
+            opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            opt.QueueLimit = 0;
+        }
+    );
+
+    options.AddSlidingWindowLimiter(
+        "sliding",
+        opt =>
+        {
+            opt.Window = TimeSpan.FromMinutes(1);
+            opt.PermitLimit = 10;
+            opt.SegmentsPerWindow = 6; // 6 x 10s Segments
+            opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            opt.QueueLimit = 0;
+        }
+    );
+
+    options.AddTokenBucketLimiter(
+        "token",
+        opt =>
+        {
+            opt.TokenLimit = 10; // max token
+            opt.ReplenishmentPeriod = TimeSpan.FromSeconds(10);
+            opt.TokensPerPeriod = 2; // refill rate
+            opt.AutoReplenishment = true;
+            opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            opt.QueueLimit = 0;
+        }
+    );
+
+    options.AddConcurrencyLimiter(
+        "concurrency",
+        opt =>
+        {
+            opt.PermitLimit = 5;
+            opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            opt.QueueLimit = 0;
+        }
+    );
+});
+
 // // Option A: quick debug
 // ActivitySource.AddActivityListener(new ActivityListener
 // {
@@ -94,6 +147,7 @@ ActivitySource.AddActivityListener(
 
 var app = builder.Build();
 
+app.UseRateLimiter();
 app.UseSwagger();
 app.UseSwaggerUI();
 

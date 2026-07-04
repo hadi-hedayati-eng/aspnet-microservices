@@ -107,6 +107,41 @@ builder.Services.AddRateLimiter(options =>
             opt.QueueLimit = 0;
         }
     );
+
+    options.AddSlidingWindowLimiter(
+        "sliding",
+        opt =>
+        {
+            opt.Window = TimeSpan.FromMinutes(1);
+            opt.PermitLimit = 10;
+            opt.SegmentsPerWindow = 6; // 6 x 10s Segments
+            opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            opt.QueueLimit = 0;
+        }
+    );
+
+    options.AddTokenBucketLimiter(
+        "token",
+        opt =>
+        {
+            opt.TokenLimit = 10; // max token
+            opt.ReplenishmentPeriod = TimeSpan.FromSeconds(10);
+            opt.TokensPerPeriod = 2; // refill rate
+            opt.AutoReplenishment = true;
+            opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            opt.QueueLimit = 0;
+        }
+    );
+
+    options.AddConcurrencyLimiter(
+        "concurrency",
+        opt =>
+        {
+            opt.PermitLimit = 5;
+            opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            opt.QueueLimit = 0;
+        }
+    );
 });
 
 var app = builder.Build();
@@ -115,7 +150,11 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseRateLimiter();
-app.MapControllers().RequireRateLimiting("fixed");
+app.MapControllers()
+    .RequireRateLimiting("token")
+    .RequireRateLimiting("fixed")
+    .RequireRateLimiting("sliding")
+    .RequireRateLimiting("concurrency");
 
 app.MapGrpcService<GrpcPlatformController>();
 app.MapGrpcReflectionService();

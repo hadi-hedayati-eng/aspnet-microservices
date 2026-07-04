@@ -5,6 +5,7 @@ using CommandService.Domain;
 using CommandService.Infrastructure.Repositories.Commands;
 using CommandService.Infrastructure.Repositories.Platforms;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace CommandService.Controllers;
 
@@ -33,6 +34,7 @@ public class CommandsController : ControllerBase
         _logger = logger;
     }
 
+    [EnableRateLimiting("token")]
     [HttpGet("{platformId}/commands")]
     public async Task<ActionResult<IEnumerable<CommandReadDto>>> GetCommands(
         [FromRoute] int platformId

@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="CommandService/CommandService.csproj" />
+  <Project Path="PlatformService.UnitTests/PlatformService.UnitTests.csproj" />
   <Project Path="PlatformService/PlatformService.csproj" />
 </Solution>
